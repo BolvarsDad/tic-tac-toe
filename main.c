@@ -1,7 +1,13 @@
 #include <stdio.h>
 
-#define MIN(a,b) \
-    ( (a) < (b) ? (a) : (b) )
+static inline int
+min(int a, int b)
+{
+    if (a < b)
+        return a;
+
+    return b;
+}
 
 const int winstates[8][3] = {
     {0,1,2}, {3,4,5}, {6,7,8},  // horizontal
@@ -16,7 +22,7 @@ print_board(char *board)
 
     for (int y = 0; y < 3; ++y){
         for (int x = 0; x < 3; ++x){
-            int player = MIN(3, board[y * 3 + x]);
+            int player = min(3, board[y * 3 + x]);
 
             if (player < 0)
                 player = 3;
