@@ -1,18 +1,18 @@
 #include <stdio.h>
 
-static inline int
-min(int a, int b)
-{
-    if (a < b)
-        return a;
-
-    return b;
-}
+#define MIN(num1, num2) \
+    ( (num1) < (num2) ? (num1) : (num2) )
 
 const int winstates[8][3] = {
     {0,1,2}, {3,4,5}, {6,7,8},  // horizontal
     {0,3,6}, {1,4,7}, {2,5,8},  // vertical
     {0,4,8}, {2,4,6}            // diagonal
+};
+
+static const char *winres_str[3] = {
+    "Draw",
+    "Win",
+    "Lose"
 };
 
 void
@@ -22,7 +22,7 @@ print_board(char *board)
 
     for (int y = 0; y < 3; ++y){
         for (int x = 0; x < 3; ++x){
-            int player = min(3, board[y * 3 + x]);
+            int player = MIN(3, board[y * 3 + x]);
 
             if (player < 0)
                 player = 3;
@@ -34,10 +34,27 @@ print_board(char *board)
     }
 }
 
+// Since the return value here will be either 0, 1, or 2, this works fine.
+// 00
+// 01
+// 10
+// Since there's no overlap of ones, any mismatch will result in a 0.
 int
 is_winstate(char *board, int const *winstate)
 {
     return board[winstate[0]] & board[winstate[1]] & board[winstate[2]];
+}
+
+int
+board_full(char *board)
+{
+    int count = 0;
+
+    for (size_t i = 0; i < 8; ++i)
+        if (board[i] == 0)
+            ++count;
+
+    return count == 0;
 }
 
 int
@@ -50,6 +67,18 @@ check_win(char *board)
         }
 
     return 0;
+}
+
+int
+validate_board(char *board)
+{
+    int count = 0;
+
+    for (size_t i = 0; i < 8; ++i)
+        if (board[i] == 0)
+            ++count;
+
+    return count > 0;
 }
 
 int
@@ -69,11 +98,13 @@ game_step(char *board, char player)
     while (check_win(board) == 0)
     {
         print_board(board);
+        if (board_full(board))
+            break;
 
         printf("Select a square (0-8): ");
         int idx = get_digit();
 
-        if (idx < 0 || idx > 8 || board[idx] == 'o')
+        if (idx < 0 || idx > 8 || board[idx] != 0)
         {
             puts("Invalid input");
         }
@@ -82,28 +113,8 @@ game_step(char *board, char player)
         }
     }
 
-    if (check_win(board) == player)
-        goto exit_win;
-
-    else if (check_win(board) == 0)
-        goto exit_draw;
-
-    else
-        goto exit_loss;
-
-exit_win:
-    puts("You win");
     print_board(board);
-    return 0;
-
-exit_loss:
-    puts("You lose");
-    print_board(board);
-    return 0;
-
-exit_draw:
-    puts("Draw");
-    print_board(board);
+    printf("%s\n", winres_str[check_win(board)]);
     return 0;
 }
 
