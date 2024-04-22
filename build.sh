@@ -1,5 +1,4 @@
 #!/bin/bash
 
-set -xe
-
-cc -Wall -Wextra main.c
+mkdir -p build
+gcc -o build/tictactoe src/main.c

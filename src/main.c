@@ -1,18 +1,20 @@
 #include <stdio.h>
 
+#include "minimax.h"
+
 #define MIN(num1, num2) \
     ( (num1) < (num2) ? (num1) : (num2) )
 
-const int winstates[8][3] = {
+static const int winstates[8][3] = {
     {0,1,2}, {3,4,5}, {6,7,8},  // horizontal
     {0,3,6}, {1,4,7}, {2,5,8},  // vertical
     {0,4,8}, {2,4,6}            // diagonal
 };
 
-static const char *winres_str[3] = {
-    "Draw",
-    "Win",
-    "Lose"
+static const char *gameres_str[3] = {
+    "Game was a draw",
+    "Player won",
+    "Player lost"
 };
 
 void
@@ -35,9 +37,6 @@ print_board(char *board)
 }
 
 // Since the return value here will be either 0, 1, or 2, this works fine.
-// 00
-// 01
-// 10
 // Since there's no overlap of ones, any mismatch will result in a 0.
 int
 is_winstate(char *board, int const *winstate)
@@ -48,13 +47,11 @@ is_winstate(char *board, int const *winstate)
 int
 board_full(char *board)
 {
-    int count = 0;
-
     for (size_t i = 0; i < 8; ++i)
         if (board[i] == 0)
-            ++count;
+            return 0;
 
-    return count == 0;
+    return 1;
 }
 
 int
@@ -70,18 +67,6 @@ check_win(char *board)
 }
 
 int
-validate_board(char *board)
-{
-    int count = 0;
-
-    for (size_t i = 0; i < 8; ++i)
-        if (board[i] == 0)
-            ++count;
-
-    return count > 0;
-}
-
-int
 get_digit()
 {
     int c = getchar() - '0';
@@ -94,16 +79,16 @@ get_digit()
 
 int
 game_step(char *board, char player)
-{   
+{
     while (check_win(board) == 0)
     {
-        print_board(board);
         if (board_full(board))
             break;
 
+        print_board(board);
         printf("Select a square (0-8): ");
-        int idx = get_digit();
 
+        int idx = get_digit();
         if (idx < 0 || idx > 8 || board[idx] != 0)
         {
             puts("Invalid input");
@@ -114,7 +99,7 @@ game_step(char *board, char player)
     }
 
     print_board(board);
-    printf("%s\n", winres_str[check_win(board)]);
+    printf("%s\n", gameres_str[check_win(board)]);
     return 0;
 }
 
@@ -122,7 +107,8 @@ int
 main(void)
 {
     char board[9] = {0,0,0,0,0,0,0,0,0};
-    char player = 1;
+    char player = 1; // 1 = x
+    char opponent = 2; // 2 = o
 
     while (game_step(board, player))
         ;
